@@ -2,6 +2,7 @@
 
 const http = require('http');
 const url = require('url');
+const stringDecoder = require('string_decoder').StringDecoder;
 
 const server = http.createServer((request,response)=>{
     //Parse URL
@@ -12,10 +13,28 @@ const server = http.createServer((request,response)=>{
     //Parse HTTP Method
     let method = request.method.toUpperCase();
 
+    let queryStringObject = parsedURL.query;
+
+    //remove extra '/'s
     let trimmedPath = path.replace(/\/+|\/+$/g,'');
 
-    console.log(`Request received on path ${trimmedPath}`);
-    response.end('Sucess Data');
+    //getHeader
+    let headers = request.headers;
+
+    //getPayload
+    let decoder = new StringDecoder('utf-8');
+    let buffer ='';
+    request.on('data', (data)=>{
+        buffer += decoder.write(data);
+    })
+    request.on('end', ()=>{
+        buffer += decoder.end();
+        console.log(`Request received with this payload ${buffer}`);
+        response.end('Sucess Data');
+    }
+
+
+   
 });
 
 server.listen(port=3000,()=>{
